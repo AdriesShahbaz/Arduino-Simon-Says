@@ -1,0 +1,221 @@
+int ledRed = 13; //Red LED pin
+int ledGreen = 12; //Green LED pin
+int ledYellow = 11; //Yellow LED pin
+int ledBlue = 10; //Blue LED pin
+int buttonRed = 8; //Red button
+int buttonGreen = 6; //Green button
+int buttonYellow = 4; //Yellow button
+int buttonBlue = 2; //Blue button
+//Setting the buttons to LOW
+int buttonStateRed = 0;
+int buttonStateGreen = 0;
+int buttonStateYellow = 0;
+int buttonStateBlue = 0;
+int nRound = 0; //The round the user is on
+int nScore = 0; //The score for the round
+long randNumber; //Vairable to store the random number
+int arNum[100]; //Array to hold 100 ints
+int nTrack = 0; //Vairable to check if a random number should be added
+int i = 0; //Vairable to check the position of the array
+int nTotalScore = 0; //Track the users total score for the game
+int nNumber = 0; //Vairable to reset the array when the user fails
+//Setting the LEDs to LOW
+int ledRedState = 0;
+int ledGreenState = 0;
+int ledYellowState = 0;
+int ledBlueState = 0;
+//Vairables to check the LED's previous state (For debouncing)
+int buttonPrevRed = 0;
+int buttonPrevGreen = 0;
+int buttonPrevYellow = 0;
+int buttonPrevBlue = 0;
+int nCount = 0; //Vairable to track if the user fails
+
+void setup()
+{
+  //Setting LED's as output's
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledYellow, OUTPUT);
+  pinMode(ledBlue, OUTPUT);
+  //Setting buttons as input's
+  pinMode(buttonRed, INPUT);
+  pinMode(buttonGreen, INPUT);
+  pinMode(buttonYellow, INPUT);
+  pinMode(buttonBlue, INPUT);
+  randomSeed(analogRead(0)); //Setting the random number genorator to read the random number generated
+  Serial.begin(9600); //Initializing the serial moniter
+}
+
+void loop()
+{ 
+  nRound++; //Add one to the round
+  randNumber = random(4); //Generate a random number between 0 and 3
+  arNum[nTrack] = randNumber; //Set the postiton of nTrack in the array to the random number generated
+  nTrack++; //Move the position of the array one to the right
+  //Flash the pattern for the user to memorize
+  for (int b = 0; b < nRound; b++) {
+    //If the position of the array is 0, flash red
+    if (arNum[b] == 0) { 
+      digitalWrite(ledRed, HIGH);
+      delay(250);
+      digitalWrite(ledRed, LOW);
+      delay(250);
+    }
+    //If the position of the array is 1, flash green
+    else if (arNum[b] == 1) {
+      digitalWrite(ledGreen, HIGH);
+      delay(250);
+      digitalWrite(ledGreen, LOW);
+      delay(250);
+    }
+    //If the position of the array is 2, flash yellow
+    else if (arNum[b] == 2) {
+      digitalWrite(ledYellow, HIGH);
+      delay(250);
+      digitalWrite(ledYellow, LOW);
+      delay(250);
+    }
+    //If the position of the array is 3, flash blue
+    else if (arNum[b] == 3) {
+      digitalWrite(ledBlue, HIGH);
+      delay(250);
+      digitalWrite(ledBlue, LOW);
+      delay(250);
+    }
+    //Case in case something goes horribly wrong and the random number generated is not 0, 1, 2, or 3
+    else {
+      digitalWrite(ledRed, HIGH);
+      digitalWrite(ledGreen, HIGH);
+      digitalWrite(ledYellow, HIGH);
+      digitalWrite(ledBlue, HIGH);
+    }
+  }
+  //While the round is not complete
+  while (nScore != nRound) { 
+    //Set all the previous button reads to the state of the button
+    buttonPrevRed = buttonStateRed;
+	buttonPrevGreen = buttonStateGreen;
+	buttonPrevYellow = buttonStateYellow;
+    buttonPrevBlue = buttonStateBlue;
+    //Make it so all buttons can be read
+    buttonStateRed = digitalRead(buttonRed);
+    buttonStateGreen = digitalRead(buttonGreen);
+  	buttonStateYellow = digitalRead(buttonYellow);
+  	buttonStateBlue = digitalRead(buttonBlue);
+    if (nCount == 1){ //If the user ever fails
+      //Flash all the lights 5 times to show the user they lost
+      for (int i = 0; i < 5; i++) {
+        digitalWrite(ledRed, HIGH);
+        digitalWrite(ledGreen, HIGH);
+        digitalWrite(ledYellow, HIGH);
+        digitalWrite(ledBlue, HIGH);
+        delay(250);
+        digitalWrite(ledRed, LOW);
+        digitalWrite(ledGreen, LOW);
+        digitalWrite(ledYellow, LOW);
+        digitalWrite(ledBlue, LOW);
+        delay(250);
+      }
+      //Reset the array
+      for (int i = 0; i < 100; i++) {
+        arNum[i] = 0;
+      }
+      //Reset the game
+      nRound = 0;
+      nCount = 0;
+      nNumber++;
+      delay(5000);
+      break; //Break out of the loop
+    }
+      if (buttonStateRed == HIGH && buttonStateRed != buttonPrevRed) { //If the red button is pressed
+        if (arNum[i] == 0) { //And the postion of the array is 0 (Red)
+            nScore++; //Add one to the score (Same for other buttons)
+            i++; //Move the position of the array one to the right (Same for the other buttons)
+            digitalWrite(ledRed, HIGH);
+            delay(250);
+            digitalWrite(ledRed, LOW);
+            delay(250);
+            continue; //Go back to the top
+          }
+        else { 
+          digitalWrite(ledRed, HIGH);
+          delay(250);
+          digitalWrite(ledRed, LOW);
+          delay(250);
+          nCount++; //Add one to the fail vairable (Same for other buttons)
+          continue;
+        }
+      }
+      if (buttonStateGreen == HIGH && buttonStateGreen != buttonPrevGreen) { //If the green button is pressed
+          if (arNum[i] == 1) { //And the position of the array is 1 (Green)
+              nScore++;
+              i++;
+              digitalWrite(ledGreen, HIGH);
+              delay(250);
+              digitalWrite(ledGreen, LOW);
+              delay(250);
+              continue;
+          }
+        else {
+          digitalWrite(ledGreen, HIGH);
+          delay(250);
+          digitalWrite(ledGreen, LOW);
+          delay(250);
+          nCount++;
+          continue;
+        }
+      }
+        if (buttonStateYellow == HIGH && buttonStateYellow != buttonPrevYellow) { //If the yellow button is pressed
+          if (arNum[i] == 2) { //And the position of the array is 2 (Yellow)
+              nScore++;
+              i++;
+              digitalWrite(ledYellow, HIGH);
+              delay(250);
+              digitalWrite(ledYellow, LOW);
+              delay(250);
+              continue;
+          }
+        else {
+          digitalWrite(ledYellow, HIGH);
+          delay(250);
+          digitalWrite(ledYellow, LOW);
+          delay(250);
+          nCount++;
+          continue;
+        }
+      }
+      if (buttonStateBlue == HIGH && buttonStateBlue != buttonPrevBlue) { //If the blue button is pressed
+             if (arNum[i] == 3) { //And the position of the array is 3 (Blue)
+               nScore++;
+               i++;
+               digitalWrite(ledBlue, HIGH);
+               delay(250);
+               digitalWrite(ledBlue, LOW);
+               delay(250);
+               continue;
+             }
+        else {
+          digitalWrite(ledBlue, HIGH);
+          delay(250);
+          digitalWrite(ledBlue, LOW);
+          delay(250);
+          nCount++;
+          continue;
+        }
+     }
+  }
+  i = 0; //Reset the position of the array to the begining
+  nScore = 0; //Reset the score for the round
+  nTotalScore++; //Add one to the total Score
+  if (nNumber == 1) { //If the user failed
+    nTotalScore = 0; //Reset the total score back to 0
+    nTrack = 0; //Reset the position of the random generator
+    nNumber = 0; //Reset the fail vairable
+  }
+  //Print out the score
+  Serial.println("Score: "); 
+  Serial.print(nTotalScore);
+  Serial.println("");
+  delay(2000); //Wait two seconds between rounds
+}
